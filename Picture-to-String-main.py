@@ -7,7 +7,7 @@
 # Created:     31 03 2023
 # Copyright:   (c)MS Productions
 #
-# Lead Dev : Meit Sant (XII)
+# Lead Dev : Meit Sant
 #-------------------------------------------------------------------------------
 '''Information from the Dev:
     Every pixel has 4 values, i.e RGBA.
@@ -19,12 +19,13 @@ Bibliography :
     (i) https://stackoverflow.com/questions/138250/how-to-read-the-rgb-value-of-a-given-pixel-in-python
 '''
 
-
-Image_path = r"E:\Python Programs\Github\Picture-to-String-encoder\Test_picture.png"
-option = "D"
+option = "D" #input("Encrypt Image [E] or Decrypt Hash [D] :")
 
 from PIL import Image
 import os,sys,time
+
+
+#---------------------- Fuctions ----------------------
 
 def Encode(Nums):
     Nums = str(Nums)
@@ -102,13 +103,18 @@ def Decode(Hashed_str):
 
     return decoded
 
-im = Image.open(Image_path)
-pix = im.load()
+#---------------------- ----------------------
 
-m,n=im.size
 
 if option == "E":
+    #---------------------- Loading Image ----------------------
+    Image_path = r"E:\Python Programs\Github\Picture-to-String-encoder\Test_picture.png"
+    im = Image.open(Image_path)
+    pix = im.load()
+    m,n=im.size
     Encoded =""
+
+    #---------------------- Encrypting ----------------------
     for i in range(m):
         for j in range(n):
             tup = pix[j,i]
@@ -116,15 +122,27 @@ if option == "E":
                 E,C = Encode(k)
                 Encoded+=str(E)
                 Encoded+=str(C)
+    Encoded+=str(m)
+    Encoded+=str(n)
+
     print(Encoded)
 
+    #---------------------- Saving Encryption ----------------------
+
+
 if option == "D":
-    Decoded_lst1 = []
+
+    #---------------------- Decryption Loading ----------------------
     Decoded_lst = []
+    Decoded_lst1 = []
+    pixel_data = []
     Encoded_str = ''
     Encoded_lst = []
-    Encoded_inp = "9jYx7Rx=5^=x2ORR0K==7jc#7h==7~M#0c^^9jxY9~YY9@%e4exx2#Yx9@%e8Kd$"
+    Encoded_inp = "7RYx1@=Y6gY=3PiS4%==5h!K2cxY0#Pf1$gg2c=x7hY=0#ff7RYY1b==9bOe4gjj22"
     c=1
+
+    #---------------------- Decrypting ----------------------
+
     for o in Encoded_inp:
         Encoded_str+=o
         if c % 4 == 0:
@@ -132,24 +150,32 @@ if option == "D":
             Encoded_str=''
 
         c+=1
-
     for o in Encoded_lst:
         Decoded_lst.append(Decode(o))
-
     c=1
+    x=0
+    y=0
     for o in Decoded_lst:
         Decoded_lst1.append(o)
         if c % 4 == 0:
-            R = Decoded_lst1[0]
-            G = Decoded_lst1[1]
-            B = Decoded_lst1[2]
-            A = Decoded_lst1[3]
-
-
+            R = int(Decoded_lst1[0])
+            G = int(Decoded_lst1[1])
+            B = int(Decoded_lst1[2])
+            A = int(Decoded_lst1[3])
+            #print("(",R,",",G,",",B,",",A,")")
+            pixel_data.append((R,G,B,A))
+            Decoded_lst1 = []
         c+=1
+    #print(pixel_data)
+    m,n = int(Encoded_inp[-2]),int(Encoded_inp[-1])
+    c=0
+    #---------------------- Converting into an image ----------------------
 
+    image = Image.new(mode='RGBA', size=(m, n))
+    image.putdata(pixel_data)
 
-'''
-im.save('Computed_picture.png')
+    #---------------------- Saving Image ----------------------
+    image.save('Computed_picture.png')
+    print("Image Generated succesfully")
+
 os.startfile('Computed_picture.png')
-'''
