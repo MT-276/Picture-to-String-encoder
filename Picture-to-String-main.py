@@ -19,7 +19,7 @@ Bibliography :
     (i) https://stackoverflow.com/questions/138250/how-to-read-the-rgb-value-of-a-given-pixel-in-python
 '''
 
-option = "D" #input("Encrypt Image [E] or Decrypt Hash [D] :")
+option = input("Encrypt Image [E] or Decrypt Hash [D] :")
 
 from PIL import Image
 import os,sys,time
@@ -108,7 +108,9 @@ def Decode(Hashed_str):
 
 if option == "E":
     #---------------------- Loading Image ----------------------
-    Image_path = r"E:\Python Programs\Github\Picture-to-String-encoder\Test_picture.png"
+    print()
+    Image_path = input("Enter path of the image : ")
+    #Image_path = r"E:\Python Programs\Github\Picture-to-String-encoder\Test_picture.png"
     im = Image.open(Image_path)
     pix = im.load()
     m,n=im.size
@@ -117,17 +119,20 @@ if option == "E":
     #---------------------- Encrypting ----------------------
     for i in range(m):
         for j in range(n):
-            tup = pix[j,i]
+            tup = pix[i,j]
             for k in tup:
                 E,C = Encode(k)
                 Encoded+=str(E)
                 Encoded+=str(C)
-    Encoded+=str(m)
-    Encoded+=str(n)
+    Encoded+="."+str(m)+"?"+str(n)
 
-    print(Encoded)
 
     #---------------------- Saving Encryption ----------------------
+    file = open('Encrypted_Img.txt', 'w')
+    file.write(Encoded)
+    file.close()
+    print()
+    print("Encryption saved successfully")
 
 
 if option == "D":
@@ -138,12 +143,14 @@ if option == "D":
     pixel_data = []
     Encoded_str = ''
     Encoded_lst = []
-    Encoded_inp = "7RYx1@=Y6gY=3PiS4%==5h!K2cxY0#Pf1$gg2c=x7hY=0#ff7RYY1b==9bOe4gjj22"
+    Encoded_file_name = "Encrypted_Img.txt"#input("Enter Hashed file name : ")
+    with open(Encoded_file_name, 'r') as file:
+        Encoded_inp = file.read()
     c=1
 
     #---------------------- Decrypting ----------------------
-
-    for o in Encoded_inp:
+    e = Encoded_inp.split(".")
+    for o in e[0]:
         Encoded_str+=o
         if c % 4 == 0:
             Encoded_lst.append(Encoded_str)
@@ -167,7 +174,10 @@ if option == "D":
             Decoded_lst1 = []
         c+=1
     #print(pixel_data)
-    m,n = int(Encoded_inp[-2]),int(Encoded_inp[-1])
+    Dimension_lst = Encoded_inp.split(".")[1]
+    Dimension_lst = list(Dimension_lst)
+
+    m,n = int(Dimension_lst[0]),int(Dimension_lst[2])
     c=0
     #---------------------- Converting into an image ----------------------
 
@@ -177,5 +187,8 @@ if option == "D":
     #---------------------- Saving Image ----------------------
     image.save('Computed_picture.png')
     print("Image Generated succesfully")
+    os.startfile('Computed_picture.png')
 
-os.startfile('Computed_picture.png')
+if option != 'E' and option != 'D':
+    print("Please specify using 'E' and 'D' only")
+    sys.exit()
