@@ -177,12 +177,19 @@ if option == "D":
     Dimension_lst = Encoded_inp.split(".")[1]
     Dimension_lst = list(Dimension_lst)
 
-    m,n = int(Dimension_lst[0]),int(Dimension_lst[2])
+    n,m = int(Dimension_lst[0]),int(Dimension_lst[2])
     c=0
     #---------------------- Converting into an image ----------------------
 
     image = Image.new(mode='RGBA', size=(m, n))
-    image.putdata(pixel_data)
+    for y in range(n):
+        for x in range(m):
+            index = y * m + x
+            color = pixel_data[index]
+            image.putpixel((x, y), color)
+
+    image = image.transpose(method=Image.ROTATE_90)
+    image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
 
     #---------------------- Saving Image ----------------------
     image.save('Computed_picture.png')
