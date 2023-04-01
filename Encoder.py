@@ -1,25 +1,33 @@
-list_ = [(0, 0, 0, 255), (255, 0, 0, 255), (0, 255, 0, 255), (0, 0, 255, 255)]
-Enc_str = ""
+import random,os,sys,time
+
+Nums = 1234567890
+Computed_nums = []
 
 
-def encode(list_):
-    dict1 ={1: 'I*@',
-            2: 'hNy',
-            3: '^9a',
-            4: 'h8%',
-            5: '6$D',
-            6: 'oj#',
-            7: '$fs',
-            8: '?H2',
-            9: 'p(5',
-            0: '&tc'}
+#      0   1   2   3   4   5   6   7   8   9
+l1 = ["a","b","c","d","e","f","g","h","i","j"]
+l2 = ["K","L","M","N","O","P","Q","R","S","T"]
+l3 = ["!","@","#","$","%","^","&","*","-","~"]
 
-    for tup in list_:
-        for num in tup:
-            for char in str(num):
-                print(dict1[int(char)],end="")
-        #Enc_str.append()
+Encoder_value = random.randint(0,9)
 
-encode(list_)
+
+for i in str(Nums):
+    pointer = int(i)+Encoder_value
+    if pointer >= 10:
+        pointer = pointer - 10
+
+    Hash = random.randint(1,3)
+
+    if Hash == 1:
+        Computed_nums.append(l1[pointer])
+    if Hash == 2:
+        Computed_nums.append(l2[pointer])
+    if Hash == 3:
+        Computed_nums.append(l3[pointer])
+
+print(Encoder_value)
+
+for j in Computed_nums:print(j,end="")
 
 
