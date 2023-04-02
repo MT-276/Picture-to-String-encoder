@@ -131,6 +131,7 @@ def Convert_to_PNG(path):
 
 
 if option == "E":
+    start_time = time.time()
     #---------------------- Loading Image ----------------------
     Loaded = False
     while Loaded != True:
@@ -194,10 +195,14 @@ if option == "E":
     if Delete == True:
           os.remove(Image_path)
     del Delete,F,Encoded,file
+    if Debug_mode == True:
+        print("Time for execution : %s seconds" % (time.time() - start_time))
+
     sys.exit()
 
 
 if option == "D":
+    start_time = time.time()
     #---------------------- Decode Loading ----------------------
     Decoded_lst = []
     Decoded_lst1 = []
@@ -284,6 +289,8 @@ if option == "D":
         sys.exit()
     print("Image saved succesfully")
     os.startfile('Decoded_picture.png')
+    if Debug_mode == True:
+        print("Time for execution : %s seconds" % (time.time() - start_time))
     sys.exit()
 
 if option != 'E' and option != 'D':
