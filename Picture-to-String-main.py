@@ -1,6 +1,5 @@
 #-------------------------------------------------------------------------------
-# Name:        Picture-to-String-Encoder
-# Purpose:
+# Name:        Picture-Encoder-and-Decoder
 #
 # Author:      MS Productions
 #
@@ -18,11 +17,21 @@
 Bibliography :
     (i) https://stackoverflow.com/questions/138250/how-to-read-the-rgb-value-of-a-given-pixel-in-python
 '''
+print("Image Encoder and Decoder\nDeveloped by  : <MS Productions>\nCopyright     : (c)MS Productions\n")
+option = input("Encode Image [E] or Decode string [D] :")
 
-option = input("Encrypt Image [E] or Decrypt Hash [D] :")
+Debug_mode = True
 
-from PIL import Image
-import os,sys,time
+Loaded = False
+while Loaded != True:
+    try:
+        from PIL import Image
+        import os,sys,time
+        Loaded = True
+    except:
+        print("\n[ERROR] An error occured while loading libraries\nAttempting to download libraries...")
+        from os import system
+        system("pip install Pillow")
 
 
 #---------------------- Fuctions ----------------------
@@ -103,20 +112,58 @@ def Decode(Hashed_str):
 
     return decoded
 
-#---------------------- ----------------------
+def Convert_to_PNG(path):
+    F = "muk\muk"
+    F = F.replace("muk","")
+    F = path.split(F)
+    F = F[-1]
+    F = F.split(".")
+    F = F[0]
+    new_path = F+".png"
+    im = Image.open(path)
+    im4 = im.convert('RGBA')
+    im4.save(new_path)
+
+    del im4
+    return new_path
+
+#---------------------- Main ----------------------
 
 
 if option == "E":
     #---------------------- Loading Image ----------------------
-    print()
-    Image_path = input("Enter path of the image : ")
-    #Image_path = r"E:\Python Programs\Github\Picture-to-String-encoder\Test_picture.png"
-    im = Image.open(Image_path)
+    Loaded = False
+    while Loaded != True:
+        print()
+        Image_path = input("Enter path of the image : ")
+        Image_path = Image_path.replace('"',"")
+        try:
+
+            F = "muk\muk"
+            F = F.replace("muk","")
+            F = Image_path.split(F)
+            F = F[-1]
+            F = F.split(".")
+            F = F[1]
+            Delete = False
+            if F != "png":
+                Image_path = Convert_to_PNG(Image_path)
+                Delete = True
+            im = Image.open(Image_path)
+            Loaded = True
+        except:
+            print("The path of the image is invalid, please try again!")
+            if Debug_mode == True:
+                print("\n",Image_path)
+
     pix = im.load()
     m,n=im.size
     Encoded =""
 
-    #---------------------- Encrypting ----------------------
+    del Loaded,F
+    #---------------------- Encoding ----------------------
+    print("\nEncoding image...")
+
     for i in range(m):
         for j in range(n):
             tup = pix[i,j]
@@ -126,76 +173,119 @@ if option == "E":
                 Encoded+=str(C)
     Encoded+="."+str(m)+"?"+str(n)
 
-
+    del m,n,i,j,tup,k,E,C
+    print("Image Encoded")
     #---------------------- Saving Encryption ----------------------
-    file = open('Encrypted_Img.txt', 'w')
+
+    print("\nSaving Image Encoding...")
+    F = "muk\muk"
+    F = F.replace("muk","")
+    F = Image_path.split(F)
+    F = F[-1]
+    F = F.split(".")
+    F = F[0]
+    F = "Encoded_"+F+".txt"
+    file = open(F, 'w')
     file.write(Encoded)
     file.close()
-    print()
-    print("Encryption saved successfully")
+
+    print("Encoding saved successfully")
+
+    if Delete == True:
+          os.remove(Image_path)
+    del Delete,F,Encoded,file
+    sys.exit()
 
 
 if option == "D":
-
-    #---------------------- Decryption Loading ----------------------
+    #---------------------- Decode Loading ----------------------
     Decoded_lst = []
     Decoded_lst1 = []
     pixel_data = []
     Encoded_str = ''
     Encoded_lst = []
-    Encoded_file_name = "Encrypted_Img.txt"#input("Enter Hashed file name : ")
-    with open(Encoded_file_name, 'r') as file:
-        Encoded_inp = file.read()
     c=1
 
-    #---------------------- Decrypting ----------------------
-    e = Encoded_inp.split(".")
-    for o in e[0]:
-        Encoded_str+=o
-        if c % 4 == 0:
-            Encoded_lst.append(Encoded_str)
-            Encoded_str=''
+    Loaded = False
+    while Loaded != True:
+        try:
+            Encoded_file_name = input("Enter Encoded file path : ")
+            with open(Encoded_file_name, 'r') as file:
+                Encoded_inp = file.read()
+            Loaded = True
+        except:
+            print("[ERROR] File path incorrect. Please try again")
+            if Debug_mode == True:
+                print(Encoded_file_name)
 
-        c+=1
-    for o in Encoded_lst:
-        Decoded_lst.append(Decode(o))
-    c=1
-    x=0
-    y=0
-    for o in Decoded_lst:
-        Decoded_lst1.append(o)
-        if c % 4 == 0:
-            R = int(Decoded_lst1[0])
-            G = int(Decoded_lst1[1])
-            B = int(Decoded_lst1[2])
-            A = int(Decoded_lst1[3])
-            #print("(",R,",",G,",",B,",",A,")")
-            pixel_data.append((R,G,B,A))
-            Decoded_lst1 = []
-        c+=1
-    #print(pixel_data)
-    Dimension_lst = Encoded_inp.split(".")[1]
-    Dimension_lst = list(Dimension_lst)
 
-    n,m = int(Dimension_lst[0]),int(Dimension_lst[2])
-    c=0
+    #---------------------- Decoding ----------------------
+    print("\nDecoding...")
+    try:
+        e = Encoded_inp.split(".")
+        for o in e[0]:
+            Encoded_str+=o
+            if c % 4 == 0:
+                Encoded_lst.append(Encoded_str)
+                Encoded_str=''
+            c+=1
+
+        for o in Encoded_lst:
+            Decoded_lst.append(Decode(o))
+
+        c=1
+        x=0
+        y=0
+        for o in Decoded_lst:
+            Decoded_lst1.append(o)
+            if c % 4 == 0:
+                R = int(Decoded_lst1[0])
+                G = int(Decoded_lst1[1])
+                B = int(Decoded_lst1[2])
+                A = int(Decoded_lst1[3])
+                #print("(",R,",",G,",",B,",",A,")")
+                pixel_data.append((R,G,B,A))
+                Decoded_lst1 = []
+            c+=1
+        Dimension_lst = Encoded_inp.split(".")[1]
+        Dimension_lst = Dimension_lst.split("?")
+        m,n = int(Dimension_lst[0]),int(Dimension_lst[1])
+        c=0
+        print("File Decoded\n\nInitializing image generation...")
+    except:
+        print("\n[ERROR] Decryption Failed. Please verify file contents")
+        sys.exit()
     #---------------------- Converting into an image ----------------------
+    try:
+        image = Image.new('RGBA', (m, n))
+        #print(m,"x",n)
+        #print(len(pixel_data))
 
-    image = Image.new(mode='RGBA', size=(m, n))
-    for y in range(n):
+        index = -1
         for x in range(m):
-            index = y * m + x
-            color = pixel_data[index]
-            image.putpixel((x, y), color)
+            for y in range(n):
+                index += 1
 
-    image = image.transpose(method=Image.ROTATE_90)
-    image = image.transpose(method=Image.FLIP_TOP_BOTTOM)
+                color = pixel_data[index]
+                image.putpixel((x, y), color)
+        print("Image Generated succesfully")
+    except:
+        print("\n[ERROR] Image Generation Failed")
+        if Debug_mode == True:
+            print("\n",m,"x",n,"\n",index,"\n",Encoded_file_name)
 
+        sys.exit()
     #---------------------- Saving Image ----------------------
-    image.save('Computed_picture.png')
-    print("Image Generated succesfully")
-    os.startfile('Computed_picture.png')
+    print("\nSaving Image...")
+    try:
+        image.save('Decoded_picture.png')
+    except:
+        print("\n[ERROR] Image saving failed")
+        sys.exit()
+    print("Image saved succesfully")
+    os.startfile('Decoded_picture.png')
+    sys.exit()
 
 if option != 'E' and option != 'D':
-    print("Please specify using 'E' and 'D' only")
+    print("\n[ERROR] Please specify using 'E' and 'D' only")
     sys.exit()
