@@ -127,6 +127,8 @@ def Convert_to_PNG(path):
     del im4
     return new_path
 
+#ToDo1 Completly change to jpg images only.
+
 #---------------------- Main ----------------------
 
 
@@ -163,32 +165,43 @@ if option == "E":
 
     del Loaded,F
     #---------------------- Encoding ----------------------
+
+    #ToDo3 Add "Estimated time" in non- debug mode
+
     print("\nEncoding image...")
-
-    for i in range(m):
-        for j in range(n):
-            tup = pix[i,j]
-            for k in tup:
-                E,C = Encode(k)
-                Encoded+=str(E)
-                Encoded+=str(C)
-    Encoded+="."+str(m)+"?"+str(n)
-
+    try:
+        for i in range(m):
+            for j in range(n):
+                tup = pix[i,j]
+                for k in tup:
+                    E,C = Encode(k)
+                    Encoded+=str(E)
+                    Encoded+=str(C)
+        Encoded+="."+str(m)+"?"+str(n)
+    #ToDo2 Save encoding to a txt file instead of saving in RAM.
+    except:
+        print("[ERROR] Encoding failed")
+        sys.exit()
     del m,n,i,j,tup,k,E,C
     print("Image Encoded")
     #---------------------- Saving Encryption ----------------------
 
     print("\nSaving Image Encoding...")
-    F = "muk\muk"
-    F = F.replace("muk","")
-    F = Image_path.split(F)
-    F = F[-1]
-    F = F.split(".")
-    F = F[0]
-    F = "Encoded_"+F+".txt"
-    file = open(F, 'w')
-    file.write(Encoded)
-    file.close()
+
+    try:
+        F = "muk\muk"
+        F = F.replace("muk","")
+        F = Image_path.split(F)
+        F = F[-1]
+        F = F.split(".")
+        F = F[0]
+        F = "Encoded_"+F+".txt"
+        file = open(F, 'w')
+        file.write(Encoded)
+        file.close()
+    except:
+        print("[ERROR] Encoded Data was not saved. Check Disk space")
+        sys.exit()
 
     print("Encoding saved successfully")
 
@@ -285,7 +298,7 @@ if option == "D":
     try:
         image.save('Decoded_picture.png')
     except:
-        print("\n[ERROR] Image saving failed")
+        print("[ERROR] Image was not saved. Check Disk space")
         sys.exit()
     print("Image saved succesfully")
     os.startfile('Decoded_picture.png')
