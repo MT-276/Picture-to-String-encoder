@@ -8,15 +8,7 @@
 #
 # Lead Dev : Meit Sant
 #-------------------------------------------------------------------------------
-'''Information from the Dev:
-    Every pixel has 4 values, i.e RGBA.
-    R = Red (255)
-    G = Green (255)
-    B = Blue (255)
-    A = Alpha [Basically the brightness of the colour] (255)
-Bibliography :
-    (i) https://stackoverflow.com/questions/138250/how-to-read-the-rgb-value-of-a-given-pixel-in-python
-'''
+
 print("Image Encoder and Decoder\nDeveloped by  : <MS Productions>\nCopyright     : (c)MS Productions\n")
 option = input("Encode Image [E] or Decode string [D] :")
 
@@ -112,34 +104,35 @@ def Decode(Hashed_str):
 
     return decoded
 
-def Convert_to_PNG(path):
+def Convert_to_JPG(path):
     F = "muk\muk"
     F = F.replace("muk","")
     F = path.split(F)
     F = F[-1]
     F = F.split(".")
     F = F[0]
-    new_path = F+".png"
+    new_path = F+".jpg"
     im = Image.open(path)
-    im4 = im.convert('RGBA')
+    im4 = im.convert('RGB')
     im4.save(new_path)
 
     del im4
     return new_path
 
-#ToDo1 Completly change to jpg images only.
 
 #---------------------- Main ----------------------
 
 
 if option == "E":
-    start_time = time.time()
+
     #---------------------- Loading Image ----------------------
     Loaded = False
     while Loaded != True:
         print()
         Image_path = input("Enter path of the image : ")
-        Image_path = Image_path.replace('"',"")
+
+        if '"' in Image_path:
+            Image_path = Image_path.replace('"','')
         try:
 
             F = "muk\muk"
@@ -149,10 +142,11 @@ if option == "E":
             F = F.split(".")
             F = F[1]
             Delete = False
-            if F != "png":
-                Image_path = Convert_to_PNG(Image_path)
+            if F != "jpg":
+                Image_path = Convert_to_JPG(Image_path)
                 Delete = True
             im = Image.open(Image_path)
+            start_time = time.perf_counter ()
             Loaded = True
         except:
             print("The path of the image is invalid, please try again!")
@@ -208,14 +202,11 @@ if option == "E":
     if Delete == True:
           os.remove(Image_path)
     del Delete,F,Encoded,file
-    if Debug_mode == True:
-        print("Time for execution : %s seconds" % (time.time() - start_time))
 
-    sys.exit()
 
 
 if option == "D":
-    start_time = time.time()
+
     #---------------------- Decode Loading ----------------------
     Decoded_lst = []
     Decoded_lst1 = []
@@ -227,10 +218,12 @@ if option == "D":
     Loaded = False
     while Loaded != True:
         try:
-            Encoded_file_name = input("Enter Encoded file path : ")
+            Encoded_file_name = "Encoded_DBC.txt" #input("Enter Encoded file path : ")
             with open(Encoded_file_name, 'r') as file:
                 Encoded_inp = file.read()
             Loaded = True
+            start_time = time.perf_counter ()
+
         except:
             print("[ERROR] File path incorrect. Please try again")
             if Debug_mode == True:
@@ -256,13 +249,13 @@ if option == "D":
         y=0
         for o in Decoded_lst:
             Decoded_lst1.append(o)
-            if c % 4 == 0:
+            if c % 3 == 0:
                 R = int(Decoded_lst1[0])
                 G = int(Decoded_lst1[1])
                 B = int(Decoded_lst1[2])
-                A = int(Decoded_lst1[3])
+                #A = int(Decoded_lst1[3])
                 #print("(",R,",",G,",",B,",",A,")")
-                pixel_data.append((R,G,B,A))
+                pixel_data.append((R,G,B))
                 Decoded_lst1 = []
             c+=1
         Dimension_lst = Encoded_inp.split(".")[1]
@@ -273,9 +266,12 @@ if option == "D":
     except:
         print("\n[ERROR] Decryption Failed. Please verify file contents")
         sys.exit()
+
+
+
     #---------------------- Converting into an image ----------------------
     try:
-        image = Image.new('RGBA', (m, n))
+        image = Image.new('RGB', (m, n))
         #print(m,"x",n)
         #print(len(pixel_data))
 
@@ -296,16 +292,19 @@ if option == "D":
     #---------------------- Saving Image ----------------------
     print("\nSaving Image...")
     try:
-        image.save('Decoded_picture.png')
+        image.save('Decoded_picture.jpg')
     except:
         print("[ERROR] Image was not saved. Check Disk space")
         sys.exit()
     print("Image saved succesfully")
-    os.startfile('Decoded_picture.png')
-    if Debug_mode == True:
-        print("Time for execution : %s seconds" % (time.time() - start_time))
-    sys.exit()
+    os.startfile('Decoded_picture.jpg')
 
 if option != 'E' and option != 'D':
     print("\n[ERROR] Please specify using 'E' and 'D' only")
-    sys.exit()
+
+if Debug_mode == True:
+    end_time = time.perf_counter ()
+    ao = (end_time - start_time)//1
+    if ao>=60:
+        ao = str(ao//60) +" Min " + str(ao%60)
+    print("\nTime for execution : ",ao, "Sec")
