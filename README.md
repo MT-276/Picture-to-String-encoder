@@ -30,6 +30,6 @@ The encoding process involves taking the RGB pixel values of an image and conver
 To decode an encoded image, select the "D" option from the main menu and enter the hashed string. The script will then convert the hashed string back into its original RGB pixel values and display the decoded image on the screen.
 
 ###### Notes
-* The script only works with PNG or JPEG image files (For now !). If the input image is in a different format, it will be converted to PNG format automatically.
+* The script only works with PNG or JPEG image files (For now !). If the input image is in a different format, it will be converted to jpg format automatically.
 * The script uses a custom hashing algorithm that converts each pixel value into a combination of letters and symbols. The algorithm is not cryptographically secure, so it should not be used for sensitive data.
 * This project is not intended to be used for illegal or unethical purposes. The developer assumes no liability for any misuse of the script.
