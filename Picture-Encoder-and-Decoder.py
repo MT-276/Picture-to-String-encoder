@@ -23,7 +23,7 @@ while Loaded != True:
     except:
         print("\n[ERROR] An error occured while loading libraries\nAttempting to download libraries...")
         from os import system
-        system("pip install Pillow")
+        system("pip install Pillow --user")
 
 
 #---------------------- Fuctions ----------------------
@@ -218,7 +218,7 @@ if option == "D":
     Loaded = False
     while Loaded != True:
         try:
-            Encoded_file_name = "Encoded_DBC.txt" #input("Enter Encoded file path : ")
+            Encoded_file_name = input("Enter Encoded file path : ")
             with open(Encoded_file_name, 'r') as file:
                 Encoded_inp = file.read()
             Loaded = True
@@ -307,4 +307,4 @@ if Debug_mode == True:
     ao = (end_time - start_time)//1
     if ao>=60:
         ao = str(ao//60) +" Min " + str(ao%60)
-    print("\nTime for execution : ",ao, "Sec")
+    print("\nTime for execution : ",int(ao), "Sec")
