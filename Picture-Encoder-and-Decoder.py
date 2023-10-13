@@ -77,7 +77,7 @@ def Encode(Nums):
     for j in Computed_nums_lst:
         Computed_nums += j
 
-    del Hash,pointer,Nums,Computed_nums_lst,l1,l2,l3,p,v
+
 
     return Key,Computed_nums                                        # Returns Key and Encoded colour data
 
@@ -191,22 +191,20 @@ if option == "E":
         sys.exit()
 
 
-    try:
-        for i in range(m):                                          # m = no. of rows
-            for j in range(n):                                      # n = no. of columns
-                tup = pix[i,j]                                      # pix[i,j] --> Gets the RGB data of the pixel
-                for k in tup:
-                    E,C = Encode(k)                                 # RGB value encoded via Encode() function
-                    Encoded+=str(E)
-                    Encoded+=str(C)
-                    file.write(Encoded)                             # [NEW] Directly saving to txt file instead of RAM.
-                    Encoded = ''
 
-        file.write("."+str(m)+"?"+str(n))
-        file.close()
-    except:
-        print("[ERROR] Encoding failed")
-        sys.exit()
+    for i in range(m):                                          # m = no. of rows
+        for j in range(n):                                      # n = no. of columns
+            tup = pix[i,j]                                      # pix[i,j] --> Gets the RGB data of the pixel
+            for k in tup:
+                E,C = Encode(k)                                 # RGB value encoded via Encode() function
+                Encoded+=str(E)
+                Encoded+=str(C)
+                file.write(Encoded)                             # [NEW] Directly saving to txt file instead of RAM.
+                Encoded = ''
+
+    file.write("."+str(m)+"?"+str(n))
+    file.close()
+
     del m,n,i,j,tup,k,E,C
     print("Image Encoded")
 
