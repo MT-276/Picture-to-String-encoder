@@ -114,9 +114,7 @@ def Decode(Hashed_str):
     return decoded                                                  # Returns decoded colour value
 
 def Convert_to_JPG(path):
-    F = "muk\muk"
-    F = F.replace("muk","")
-    F = path.split(F)
+    F = path.split('\\')
     F = F[-1]
     F = F.split(".")
     F = F[0]
@@ -145,9 +143,7 @@ if option == "E":
             Image_path = Image_path.replace('"','')
         try:
 
-            F = "muk\muk"
-            F = F.replace("muk","")
-            F = Image_path.split(F)
+            F = path.split('\\')
             F = F[-1]
             F = F.split(".")
             F = F[1]
@@ -158,8 +154,8 @@ if option == "E":
             im = Image.open(Image_path)                             # and will delete the temp jpg after execution
             start_time = time.perf_counter ()
             Loaded = True
-        except:
-            print("The path of the image is invalid, please try again!")
+        except Exception as e:
+            print(f"[ERROR] {e}")
             if Debug_mode == True:
                 print("\n",Image_path)
         if c == 5:
@@ -178,9 +174,7 @@ if option == "E":
 
 
     try:
-        F = "muk\muk"
-        F = F.replace("muk","")
-        F = Image_path.split(F)
+        F = path.split('\\')
         F = F[-1]
         F = F.split(".")
         F = F[0]
@@ -227,9 +221,7 @@ if option == "D":
         try:
             Encoded_file_name = input("Enter Encoded file path : ") # User input for path of encoded file path
 
-            F = "muk\muk"
-            F = F.replace("muk","")
-            F = Encoded_file_name.split(F)
+            F = path.split('\\')
             F = F[-1]
             F = F.split(".")
             F = F[-1]
@@ -242,8 +234,8 @@ if option == "D":
             Loaded = True
             start_time = time.perf_counter ()                       # Starts recording time for execution
 
-        except:
-            print("[ERROR] File path incorrect. Please try again")
+        except Exception as e:
+            print(f"[ERROR] {e}")
             if Debug_mode == True:
                 print(Encoded_file_name)
         if c == 5:
@@ -258,11 +250,12 @@ if option == "D":
 
     c=1
     try:
-        pixel_encoding = Encoded_inp.split(".")                     # The encoding has two parts:
-#                                                                   #       (1) The pixel's encoding
-#                                                                   #       (2) The image's dimensions
-#                                                                   # The pixel's encoding and The image's dimensions
-#                                                                   # are separted by a "."
+        pixel_encoding = Encoded_inp.split(".")
+        # The encoding has two parts:
+        #       (1) The pixel's encoding
+        #       (2) The image's dimensions
+        # The pixel's encoding and The image's dimensions
+        # are separted by a "."
 
 
         for Char in pixel_encoding[0]:                              # Seperates chunks of encoded pixel data
