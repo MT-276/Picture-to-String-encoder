@@ -10,31 +10,19 @@
 #-------------------------------------------------------------------------------
 
 print("Image Encoder and Decoder\nDeveloped by  : <MS Productions>\nCopyright     : (c)MS Productions\n")
-try:
-    option = input("Encode Image [E] or Decode string [D] :")
-except KeyboardInterrupt:
-    print("\n[ERROR] Keyboard Interrupt. Exiting...")
-    sys.exit()
 
 Debug_mode = True
 
-Loaded = False
-c=0
-while Loaded != True:
-    try:
-        from PIL import Image                                       #Importing third-party libraries
-        import os,sys,time,random
-        from tkinter.filedialog import askopenfilename
-        Loaded = True
-    except:
-        print("\n[ERROR] An error occured while loading libraries\nAttempting to download libraries...")
-        from os import system
-        system("pip install Pillow --user")                         #Attempting to download libraries if not found
-    if c == 2:
-        print("[ERROR] An error occured while loading libraries. Please Re-run the program")
-        sys.exit()
-    c+=1
+from PIL import Image                                                   #Importing third-party libraries
+import os,sys,time,random,_tkinter
+from tkinter.filedialog import askopenfilename
+from functools import cache
 
+try:
+    option = input("Encode Image [E] or Decode string [D] : ").upper()
+except KeyboardInterrupt:
+    print("\n[ERROR] Keyboard Interrupt. Exiting...")
+    sys.exit()
 
 #---------------------- Fuctions ----------------------
 
@@ -86,6 +74,7 @@ def Encode(Nums):
 
     return Key,Computed_nums                                        # Returns Key and Encoded colour data
 
+@cache
 def Decode(Hashed_str):
 
     decoded = ""
@@ -169,17 +158,17 @@ if option == "E":
     #---------------------- Loading Image ----------------------
     for c in range(5):
         print("\nPlease Choose the image you want to encode")
-        Image_path = Choose_File('Img')            # User input for path of Img.
-        #print(Image_path)
+        try:
+            Image_path = Choose_File('Img')                         # User input for path of Img.
+        except _tkinter.TclError:
+            print("[ERROR] Could not open explorer window.")
+            Image_path = input("\nPlease enter the path of the image manually: ")
+
         if '"' in Image_path:
             Image_path = Image_path.replace('"','')
         try:
-            F = Image_path.split('\\')
-            F = F[-1]
-            F = F.split(".")
-            F = F[1]
             Delete = False
-            if F != "jpg":
+            if Image_path.split(".")[1] != "jpg":                   # Checks if the image is a jpg file or not
                 Image_path = Convert_to_JPG(Image_path)             # This program works only on jpg files and hence
                 Delete = True                                       # will convert any non-jpg files to a temp jpg
             im = Image.open(Image_path)                             # and will delete the temp jpg after execution
@@ -196,7 +185,6 @@ if option == "E":
     m,n=im.size                                                     # Obtaining size of image
     Encoded =""
 
-    del Loaded,F
     #---------------------- Encoding ----------------------         # Start of Encoding process
 
     print("\nEncoding image...")
@@ -214,14 +202,14 @@ if option == "E":
 
 
 
-    for i in range(m):                                          # m = no. of rows
-        for j in range(n):                                      # n = no. of columns
-            tup = pix[i,j]                                      # pix[i,j] --> Gets the RGB data of the pixel
+    for i in range(m):                                              # m = no. of rows
+        for j in range(n):                                          # n = no. of columns
+            tup = pix[i,j]                                          # pix[i,j] --> Gets the RGB data of the pixel
             for k in tup:
-                E,C = Encode(k)                                 # RGB value encoded via Encode() function
+                E,C = Encode(k)                                     # RGB value encoded via Encode() function
                 Encoded+=str(E)
                 Encoded+=str(C)
-                file.write(Encoded)                             # [NEW] Directly saving to txt file instead of RAM.
+                file.write(Encoded)                                 # [NEW] Directly saving to txt file instead of RAM.
                 Encoded = ''
 
     file.write("."+str(m)+"?"+str(n))
@@ -242,30 +230,35 @@ if option == "D":
     pixel_data = []
     Encoded_str = ''
 
-    for c in range(3):
+    for c in range(5):
         print("\nPlease Choose the file you want to decode")
-        Encoded_file_name = Choose_File('Text')                 # User input for path of encoded file path
-
-        F = Encoded_file_name.replace('"','')
-        F = F.split('\\')
-        F = F[-1]
-        F = F.split(".")
-        F = F[-1]
-        if F != "txt":                                          # Checks if the file format is correct or not
-            print("\n[ERROR] File format incorrect (Must be a .txt)")
-            print(f"[ERROR] > {F}")
+        try:
+            Encoded_file_name = Choose_File('Text')                 # User input for path of encoded file path
+        except _tkinter.TclError:
+            print("[ERROR] Could not open explorer window.")
+            Encoded_file_name = input("\nPlease enter the path of the file manually: ")
+            if '"' in Encoded_file_name:
+                Encoded_file_name = Encoded_file_name.replace('"','')
+        except Exception as e:
+            print(f"\n{e}\n[ERROR] Please try again.")
             continue
+
+        if Encoded_file_name == '':
+            print("\n[ERROR] Operation cancelled. Exiting...")
+            sys.exit()
+
+        if Encoded_file_name.split(".")[-1] != "txt":
+            print("\n[ERROR] Please choose a txt file only.")
+            continue
+
         try:
             with open(Encoded_file_name, 'r') as file:
                 Encoded_inp = file.read()
-        except Exception as e:                                                      # Loades file contents in a variable [Encoded_inp]
+        except Exception as e:                                      # Loades file contents in a variable [Encoded_inp]
             print(f"\n{e}\n[ERROR] Please try again.")
             continue
-        Loaded = True
         start_time = time.perf_counter ()                           # Starts recording time for execution
         break
-
-    del F,c,Loaded                                                  # Deleting un-used variables to save RAM
 
     #---------------------- Decoding ----------------------
     print("\nDecoding...")
@@ -294,8 +287,6 @@ if option == "D":
                 R = int(Decoded_lst1[0])
                 G = int(Decoded_lst1[1])
                 B = int(Decoded_lst1[2])
-                #A = int(Decoded_lst1[3])
-                #print("(",R,",",G,",",B,",",A,")")
                 pixel_data.append((R,G,B))                          # Joins all the un-organised pixel data
                 Decoded_lst1 = []
             c+=1
@@ -336,13 +327,25 @@ if option == "D":
     #---------------------- Saving Image ----------------------
     print("\nSaving Image...")
 
+    if '\\' in Encoded_file_name:
+        Encoded_file_name = Encoded_file_name.split('\\')[-1]
+    if '/' in Encoded_file_name:
+        Encoded_file_name = Encoded_file_name.split('/')[-1]
+    if 'Encoded_' in Encoded_file_name:
+        Encoded_file_name = Encoded_file_name.replace("Encoded_", "")
+
     try:
-        image.save('Decoded_picture.jpg')                           # Saves the generated image in the same dir, where the program is being executed
-    except:
-        print("[ERROR] Image was not saved. Check Disk space")
+        image.save('Decoded_' + Encoded_file_name[:-4] + '.jpg')    # Saves the generated image with "Decoded_" prefix and the name of the txt file
+    except Exception as e:
+        print(f"[ERROR] {e}")
         sys.exit()
-    print("Image saved succesfully")
-    os.startfile('Decoded_picture.jpg')                             # Opens the saved image
+    print("Image saved successfully")
+    try:
+        os.startfile('Decoded_' + Encoded_file_name[:-4] + '.jpg')  # Opens the saved image
+    except:
+        pass
+
+    del image                                                       # Deleting un-used variables to save RAM
 
 if option != 'E' and option != 'D':
     print("\n[ERROR] Please specify using 'E' and 'D' only")
@@ -352,5 +355,5 @@ if Debug_mode == True:
     end_time = time.perf_counter ()
     ao = (end_time - start_time)//1
     if ao>=60:
-        ao = str(ao//60) +" Min " + str(ao%60)
-    print("\nTime for execution : ",int(ao), "Sec")                 # Calculates and prints the time taken for execution of the program
+        ao = str(int(ao//60)) +" Min " + str(int(ao%60)) + " Sec"
+    print("\nTime for execution : ",ao)                             # Calculates and prints the time taken for execution of the program
