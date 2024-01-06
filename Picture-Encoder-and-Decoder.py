@@ -10,7 +10,11 @@
 #-------------------------------------------------------------------------------
 
 print("Image Encoder and Decoder\nDeveloped by  : <MS Productions>\nCopyright     : (c)MS Productions\n")
-option = input("Encode Image [E] or Decode string [D] :")
+try:
+    option = input("Encode Image [E] or Decode string [D] :")
+except KeyboardInterrupt:
+    print("\n[ERROR] Keyboard Interrupt. Exiting...")
+    sys.exit()
 
 Debug_mode = True
 
@@ -20,6 +24,7 @@ while Loaded != True:
     try:
         from PIL import Image                                       #Importing third-party libraries
         import os,sys,time,random
+        from tkinter.filedialog import askopenfilename
         Loaded = True
     except:
         print("\n[ERROR] An error occured while loading libraries\nAttempting to download libraries...")
@@ -129,21 +134,47 @@ def Convert_to_JPG(path):
 
     #---------------------- Main ----------------------
 
+def Choose_File(Type):
+    '''
+    Get the file path from user by opening an Explorer window
+    '''
+
+    c=0
+    while True:
+        c+=1
+        if c == 4:
+            print("[ERROR] Too many attempts. Exiting...")
+            sys.exit()
+        # Open a Explorer window to choose a file
+        filename = askopenfilename()
+        if filename == '':
+            return # If the user closes the window without choosing a file, then do nothing.
+        if Type == 'Img':
+            if 'png' not in filename.lower() and 'jpg' not in filename.lower():
+                # Shows an error if the file type is not supported
+                print("[ERROR] The file type is not supported. Only PNGs and JPGs are allowed.")
+            else:
+                break
+        if Type == 'Text':
+            if 'txt' not in filename.lower():
+                # Shows an error if the file type is not supported
+                print("[ERROR] The file type is not supported. Only TXT format is allowed.")
+            else:
+                break
+    return filename
+
 
 if option == "E":
 
     #---------------------- Loading Image ----------------------
-    Loaded = False
-    c = 0
-    while Loaded != True:
-        print()
-        Image_path = input("Enter path of the image : ")            # User input for path of Img.
-
+    for c in range(5):
+        print("\nPlease Choose the image you want to encode")
+        Image_path = Choose_File('Img')            # User input for path of Img.
+        #print(Image_path)
         if '"' in Image_path:
             Image_path = Image_path.replace('"','')
         try:
-
-            F = path.split('\\')
+            F = Image_path.split('\\')
             F = F[-1]
             F = F.split(".")
             F = F[1]
@@ -153,15 +184,13 @@ if option == "E":
                 Delete = True                                       # will convert any non-jpg files to a temp jpg
             im = Image.open(Image_path)                             # and will delete the temp jpg after execution
             start_time = time.perf_counter ()
-            Loaded = True
+            break
+
         except Exception as e:
             print(f"[ERROR] {e}")
             if Debug_mode == True:
                 print("\n",Image_path)
-        if c == 5:
-            print("The path of the image is invalid")
-            sys.exit()
-        c+=1
+            continue
 
     pix = im.load()                                                 # Loading the image
     m,n=im.size                                                     # Obtaining size of image
@@ -172,16 +201,15 @@ if option == "E":
 
     print("\nEncoding image...")
 
-
     try:
-        F = path.split('\\')
+        F = Image_path.split('/')
         F = F[-1]
         F = F.split(".")
         F = F[0]
         F = "Encoded_"+F+".txt"                                     # Creates the file where the encoding is going
         file = open(F, 'w')                                         # to be stored while encoding.
-    except:
-        print("[ERROR] Could not save encoding. Check Disk space")
+    except Exception as e:
+        print(e)
         sys.exit()
 
 
@@ -206,7 +234,6 @@ if option == "E":
           os.remove(Image_path)                                     # in case the image was of a different format
     del Delete,F,Encoded,file                                       # and deletes it.
 
-
 if option == "D":
 
     #---------------------- Decode Loading ----------------------
@@ -215,33 +242,28 @@ if option == "D":
     pixel_data = []
     Encoded_str = ''
 
-    Loaded = False
-    c=0
-    while Loaded != True:
+    for c in range(3):
+        print("\nPlease Choose the file you want to decode")
+        Encoded_file_name = Choose_File('Text')                 # User input for path of encoded file path
+
+        F = Encoded_file_name.replace('"','')
+        F = F.split('\\')
+        F = F[-1]
+        F = F.split(".")
+        F = F[-1]
+        if F != "txt":                                          # Checks if the file format is correct or not
+            print("\n[ERROR] File format incorrect (Must be a .txt)")
+            print(f"[ERROR] > {F}")
+            continue
         try:
-            Encoded_file_name = input("Enter Encoded file path : ") # User input for path of encoded file path
-
-            F = path.split('\\')
-            F = F[-1]
-            F = F.split(".")
-            F = F[-1]
-            if F != "txt":                                          # Checks if the file format is correct or not
-                print("[ERROR] File format incorrect")
-                sys.exit()
-
             with open(Encoded_file_name, 'r') as file:
-                Encoded_inp = file.read()                           # Loades file contents in a variable [Encoded_inp]
-            Loaded = True
-            start_time = time.perf_counter ()                       # Starts recording time for execution
-
-        except Exception as e:
-            print(f"[ERROR] {e}")
-            if Debug_mode == True:
-                print(Encoded_file_name)
-        if c == 5:
-            print("The path of the image is invalid")
-            sys.exit()
-        c+=1
+                Encoded_inp = file.read()
+        except Exception as e:                                                      # Loades file contents in a variable [Encoded_inp]
+            print(f"\n{e}\n[ERROR] Please try again.")
+            continue
+        Loaded = True
+        start_time = time.perf_counter ()                           # Starts recording time for execution
+        break
 
     del F,c,Loaded                                                  # Deleting un-used variables to save RAM
 
@@ -264,8 +286,6 @@ if option == "D":
                 Decoded_lst.append(Decode(Encoded_str))             # Decodes encoded pixel data
                 Encoded_str=''
             c+=1
-
-
         c=1
 
         for Char in Decoded_lst:
@@ -326,6 +346,7 @@ if option == "D":
 
 if option != 'E' and option != 'D':
     print("\n[ERROR] Please specify using 'E' and 'D' only")
+    sys.exit()
 
 if Debug_mode == True:
     end_time = time.perf_counter ()
