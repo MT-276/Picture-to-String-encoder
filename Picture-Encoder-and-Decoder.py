@@ -22,6 +22,7 @@ try:
     option = input("Encode Image [E] or Decode string [D] : ").upper()
 except KeyboardInterrupt:
     print("\n[ERROR] Keyboard Interrupt. Exiting...")
+    input()
     sys.exit()
 
 #---------------------- Fuctions ----------------------
@@ -133,6 +134,7 @@ def Choose_File(Type):
         c+=1
         if c == 4:
             print("[ERROR] Too many attempts. Exiting...")
+            input()
             sys.exit()
         # Open a Explorer window to choose a file
         filename = askopenfilename()
@@ -163,6 +165,14 @@ if option == "E":
         except _tkinter.TclError:
             print("[ERROR] Could not open explorer window.")
             Image_path = input("\nPlease enter the path of the image manually: ")
+        except Exception as e:
+            print(f"\n{e}\n[ERROR] Please try again.")
+            continue
+
+        if Image_path == '':
+            print("\n[ERROR] Operation Cancelled. Exiting...")
+            input()
+            sys.exit()
 
         if '"' in Image_path:
             Image_path = Image_path.replace('"','')
@@ -198,6 +208,7 @@ if option == "E":
         file = open(F, 'w')                                         # to be stored while encoding.
     except Exception as e:
         print(e)
+        input()
         sys.exit()
 
 
@@ -244,7 +255,8 @@ if option == "D":
             continue
 
         if Encoded_file_name == '':
-            print("\n[ERROR] Operation cancelled. Exiting...")
+            print("\n[ERROR] Operation Cancelled. Exiting...")
+            input()
             sys.exit()
 
         if Encoded_file_name.split(".")[-1] != "txt":
@@ -298,6 +310,7 @@ if option == "D":
         m,n = int(Dimension_lst[0]),int(Dimension_lst[1])           # Gets dimension data from Encoded_inp
     except:
         print("\n[ERROR] Decryption Failed. Please verify file contents")
+        input()
         sys.exit()
 
     del Encoded_inp                                                 # Deleting un-used variables to save RAM
@@ -321,6 +334,7 @@ if option == "D":
         print("\n[ERROR] Image Generation Failed")
         if Debug_mode == True:
             print("\n",m,"x",n,"\n",index,"\n",Encoded_file_name)
+        input()
         sys.exit()
 
 
@@ -338,6 +352,7 @@ if option == "D":
         image.save('Decoded_' + Encoded_file_name[:-4] + '.jpg')    # Saves the generated image with "Decoded_" prefix and the name of the txt file
     except Exception as e:
         print(f"[ERROR] {e}")
+        input()
         sys.exit()
     print("Image saved successfully")
     try:
@@ -349,6 +364,7 @@ if option == "D":
 
 if option != 'E' and option != 'D':
     print("\n[ERROR] Please specify using 'E' and 'D' only")
+    input()
     sys.exit()
 
 if Debug_mode == True:
