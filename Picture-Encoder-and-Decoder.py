@@ -9,14 +9,23 @@
 # Lead Dev : Meit Sant
 #-------------------------------------------------------------------------------
 
-print("Image Encoder and Decoder\nDeveloped by  : <MS Productions>\nCopyright     : (c)MS Productions\n")
+print("Image Encoder and Decoder\nDeveloped by  : Meit Sant [MT_276]")
 
 Debug_mode = True
 
 from PIL import Image                                                   #Importing third-party libraries
 import os,sys,time,random,_tkinter
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilenames
 from functools import cache
+
+# Checking compatibility with the latest features
+py_ver = sys.version_info
+if py_ver.minor < 9:
+    print(f"\n[ERROR] Outdated Python version ({py_ver.major}.{py_ver.minor}).")
+    print("[INFO] V 1.1.0 onwards, this program requires Python 3.9 or higher to run.\n        Please use V1.0.0 for older versions of Python.")
+    input()
+    sys.exit()
+
 
 try:
     option = input("Encode Image [E] or Decode string [D] : ").upper()
@@ -137,27 +146,31 @@ def Choose_File(Type):
             input()
             sys.exit()
         # Open a Explorer window to choose a file
-        filename = askopenfilename()
+        filename = askopenfilenames()
         if filename == '':
             return # If the user closes the window without choosing a file, then do nothing.
         if Type == 'Img':
             if 'png' not in filename.lower() and 'jpg' not in filename.lower():
                 # Shows an error if the file type is not supported
-                print("[ERROR] The file type is not supported. Only PNGs and JPGs are allowed.")
+                print("[ERROR] The file/files type is not supported. Only PNGs and JPGs are allowed.")
             else:
                 break
         if Type == 'Text':
             if 'txt' not in filename.lower():
                 # Shows an error if the file type is not supported
-                print("[ERROR] The file type is not supported. Only TXT format is allowed.")
+                print("[ERROR] The file/files type is not supported. Only TXT format is allowed.")
             else:
                 break
     return filename
+
+#print(Choose_File('Img'))
+#sys.exit()
 
 
 if option == "E":
 
     #---------------------- Loading Image ----------------------
+    
     for c in range(5):
         print("\nPlease Choose the image you want to encode")
         try:
@@ -176,6 +189,9 @@ if option == "E":
 
         if '"' in Image_path:
             Image_path = Image_path.replace('"','')
+            
+        
+        
         try:
             Delete = False
             if Image_path.split(".")[1] != "jpg":                   # Checks if the image is a jpg file or not
@@ -226,11 +242,11 @@ if option == "E":
     file.write("."+str(m)+"?"+str(n))
     file.close()
 
-    del m,n,i,j,tup,k,E,C
+    del m,n,i,j,tup,E,C
     print("Image Encoded")
 
     if Delete == True:                                              # Checks if there was a temp JPG image created
-          os.remove(Image_path)                                     # in case the image was of a different format
+        os.remove(Image_path)                                     # in case the image was of a different format
     del Delete,F,Encoded,file                                       # and deletes it.
 
 if option == "D":
@@ -332,7 +348,7 @@ if option == "D":
         print("Image Generated succesfully")
     except:
         print("\n[ERROR] Image Generation Failed")
-        if Debug_mode == True:
+        if Debug_mode is True:
             print("\n",m,"x",n,"\n",index,"\n",Encoded_file_name)
         input()
         sys.exit()
@@ -367,7 +383,7 @@ if option != 'E' and option != 'D':
     input()
     sys.exit()
 
-if Debug_mode == True:
+if Debug_mode is True:
     end_time = time.perf_counter ()
     ao = (end_time - start_time)//1
     if ao>=60:
