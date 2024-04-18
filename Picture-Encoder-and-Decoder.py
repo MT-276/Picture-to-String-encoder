@@ -146,108 +146,111 @@ def Choose_File(Type):
             input()
             sys.exit()
         # Open a Explorer window to choose a file
-        filename = askopenfilenames()
-        if filename == '':
+        filenames = askopenfilenames()
+        if filenames == '':
             return # If the user closes the window without choosing a file, then do nothing.
-        if Type == 'Img':
-            if 'png' not in filename.lower() and 'jpg' not in filename.lower():
-                # Shows an error if the file type is not supported
-                print("[ERROR] The file/files type is not supported. Only PNGs and JPGs are allowed.")
-            else:
-                break
-        if Type == 'Text':
-            if 'txt' not in filename.lower():
-                # Shows an error if the file type is not supported
-                print("[ERROR] The file/files type is not supported. Only TXT format is allowed.")
-            else:
-                break
-    return filename
 
-#print(Choose_File('Img'))
-#sys.exit()
+        for filename in filenames:
+            if Type == 'Img':
+                if 'png' not in filename.lower() and 'jpg' not in filename.lower():
+                    # Shows an error if the file type is not supported
+                    print("[ERROR] The file/files type is not supported. Only PNGs and JPGs are allowed.")
+                else:
+                    break
+            if Type == 'Text':
+                if 'txt' not in filename.lower():
+                    # Shows an error if the file type is not supported
+                    print("[ERROR] The file/files type is not supported. Only TXT format is allowed.")
+                else:
+                    break
+        return filenames
 
 
 if option == "E":
 
     #---------------------- Loading Image ----------------------
-    
+
     for c in range(5):
-        print("\nPlease Choose the image you want to encode")
+        print("\nPlease Choose the image/images you want to encode :")
         try:
-            Image_path = Choose_File('Img')                         # User input for path of Img.
-        except _tkinter.TclError:
-            print("[ERROR] Could not open explorer window.")
-            Image_path = input("\nPlease enter the path of the image manually: ")
+            Image_lst = Choose_File('Img')                                 # User input for path of Img.
+
+        except _tkinter.TclError:                                           # If window was not opened. Then input manual paths.
+            print("[ERROR] Could not open explorer window. If encoding multiple images, please use a comma to seperate the paths.")
+            Images_path = input("\nPlease enter the path of the image manually: ")
+            if '"' in Images_path:
+                Images_path = Images_path.replace('"','')
+            Image_lst = Images_path.split(',')
+
         except Exception as e:
             print(f"\n{e}\n[ERROR] Please try again.")
             continue
 
-        if Image_path == '':
+        if Image_lst in ['',None]:                                        # Checks if the user has cancelled the operation
             print("\n[ERROR] Operation Cancelled. Exiting...")
             input()
             sys.exit()
 
-        if '"' in Image_path:
-            Image_path = Image_path.replace('"','')
-            
-        
-        
+        break
+
+    # Starting timer to find out the time for execution.
+    start_time = time.perf_counter ()
+    for Image_path in Image_lst:
+
         try:
             Delete = False
             if Image_path.split(".")[1] != "jpg":                   # Checks if the image is a jpg file or not
                 Image_path = Convert_to_JPG(Image_path)             # This program works only on jpg files and hence
                 Delete = True                                       # will convert any non-jpg files to a temp jpg
             im = Image.open(Image_path)                             # and will delete the temp jpg after execution
-            start_time = time.perf_counter ()
-            break
+
+
 
         except Exception as e:
             print(f"[ERROR] {e}")
             if Debug_mode == True:
                 print("\n",Image_path)
-            continue
-
-    pix = im.load()                                                 # Loading the image
-    m,n=im.size                                                     # Obtaining size of image
-    Encoded =""
-
-    #---------------------- Encoding ----------------------         # Start of Encoding process
-
-    print("\nEncoding image...")
-
-    try:
-        F = Image_path.split('/')
-        F = F[-1]
-        F = F.split(".")
-        F = F[0]
-        F = "Encoded_"+F+".txt"                                     # Creates the file where the encoding is going
-        file = open(F, 'w')                                         # to be stored while encoding.
-    except Exception as e:
-        print(e)
-        input()
-        sys.exit()
 
 
+        pix = im.load()                                                 # Loading the image
+        m,n=im.size                                                     # Obtaining size of image
+        Encoded =""
 
-    for i in range(m):                                              # m = no. of rows
-        for j in range(n):                                          # n = no. of columns
-            tup = pix[i,j]                                          # pix[i,j] --> Gets the RGB data of the pixel
-            for k in tup:
-                E,C = Encode(k)                                     # RGB value encoded via Encode() function
-                Encoded+=str(E)
-                Encoded+=str(C)
-                file.write(Encoded)                                 # [NEW] Directly saving to txt file instead of RAM.
-                Encoded = ''
+        #---------------------- Encoding ----------------------         # Start of Encoding process
 
-    file.write("."+str(m)+"?"+str(n))
-    file.close()
+        try:
+            F = Image_path.split('/')
+            F = F[-1]
+            F = F.split(".")
+            F = F[0]
+            F = "Encoded_"+F+".txt"                                     # Creates the file where the encoding is going
+            file = open(F, 'w')                                         # to be stored while encoding.
+        except Exception as e:
+            print(e)
+            input()
+            sys.exit()
 
-    del m,n,i,j,tup,E,C
-    print("Image Encoded")
+        print(f"\nEncoding image to {F}...")
 
-    if Delete == True:                                              # Checks if there was a temp JPG image created
-        os.remove(Image_path)                                     # in case the image was of a different format
-    del Delete,F,Encoded,file                                       # and deletes it.
+        for i in range(m):                                              # m = no. of rows
+            for j in range(n):                                          # n = no. of columns
+                tup = pix[i,j]                                          # pix[i,j] --> Gets the RGB data of the pixel
+                for k in tup:
+                    E,C = Encode(k)                                     # RGB value encoded via Encode() function
+                    Encoded+=str(E)
+                    Encoded+=str(C)
+                    file.write(Encoded)                                 # [NEW] Directly saving to txt file instead of RAM.
+                    Encoded = ''
+
+        file.write("."+str(m)+"?"+str(n))
+        file.close()
+
+        del m,n,i,j,tup,E,C
+        print("Image Encoded")
+
+        if Delete == True:                                              # Checks if there was a temp JPG image created
+            os.remove(Image_path)                                     # in case the image was of a different format
+        del Delete,F,Encoded,file                                       # and deletes it.
 
 if option == "D":
 
@@ -388,4 +391,6 @@ if Debug_mode is True:
     ao = (end_time - start_time)//1
     if ao>=60:
         ao = str(int(ao//60)) +" Min " + str(int(ao%60)) + " Sec"
-    print("\nTime for execution : ",ao)                             # Calculates and prints the time taken for execution of the program
+    else:
+        ao = str(int(ao)) + ' Sec'
+    print(f"\nTime for execution : {ao}")                             # Calculates and prints the time taken for execution of the program
