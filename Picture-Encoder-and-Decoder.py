@@ -344,8 +344,6 @@ elif option == "D":
                     Decoded_lst1 = []
                 c+=1
 
-            del Decoded_lst                                                 # Deleting un-used variables to save RAM
-
             Dimension_lst = Encoded_inp.split(".")[1]
             Dimension_lst = Dimension_lst.split("?")
             m,n = int(Dimension_lst[0]),int(Dimension_lst[1])               # Gets dimension data from Encoded_inp
