@@ -344,7 +344,7 @@ elif option == "D":
                     Decoded_lst1 = []
                 c+=1
 
-            del Decoded_lst,Encoded_str                                     # Deleting un-used variables to save RAM
+            del Decoded_lst                                                 # Deleting un-used variables to save RAM
 
             Dimension_lst = Encoded_inp.split(".")[1]
             Dimension_lst = Dimension_lst.split("?")
