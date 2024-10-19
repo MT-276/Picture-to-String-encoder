@@ -271,10 +271,6 @@ if option == "E":
 elif option == "D":
 
     #---------------------- Decode Loading ----------------------
-    Decoded_lst = []
-    Decoded_lst1 = []
-    pixel_data = []
-    Encoded_str = ''
 
     for c in range(5):
         print("\nPlease Choose the file(s) you want to decode")
@@ -301,6 +297,11 @@ elif option == "D":
     start_time = time.perf_counter ()                                       # Starts recording time for execution                      
     
     for nume,Encoded_img in enumerate(Encoded_lst):
+        
+        Decoded_lst = []
+        Decoded_lst1 = []
+        pixel_data = []
+        Encoded_str = ''
         
         print(f"\nDecoding {nume+1}) {Encoded_img.split('/')[-1]} ...")     # Prints the name of the file being decoded
        
@@ -404,7 +405,6 @@ elif option == "D":
             pass
 
         del image                                                           # Deleting un-used variables to save RAM
-
 
 else:
     print("\n[ERROR] Please specify using 'E' and 'D' only")
