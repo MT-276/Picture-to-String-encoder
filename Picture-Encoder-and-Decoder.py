@@ -143,17 +143,71 @@ def Decode(Hashed_str):
     return decoded                                                  # Returns decoded colour value
 
 def Convert_to_JPG(path):
-    F = path.split('\\')
-    F = F[-1]
-    F = F.split(".")
-    F = F[0]
-    new_path = F+".jpg"
+    # Get filename without path and extension
+    basename = os.path.basename(path)
+    filename_without_ext = os.path.splitext(basename)[0]
+    new_path = filename_without_ext + ".jpg"
     im = Image.open(path)
     im4 = im.convert('RGB')                                         # Converting to jpg format
     im4.save(new_path)                                              # Saving temp jpg image
 
     del im4                                                         # Deleting un-used variables to save RAM
     return new_path
+
+def Upscale_Image(image, factor):
+    """
+    Advanced image upscaling with sharpening and enhancement
+    """
+    try:
+        from PIL import ImageEnhance, ImageFilter
+        
+        # Get original dimensions
+        original_width, original_height = image.size
+        new_width = int(original_width * factor)
+        new_height = int(original_height * factor)
+        
+        print(f"    Upscaling from {original_width}x{original_height} to {new_width}x{new_height}...")
+        
+        # Step 1: High-quality resize using LANCZOS (best for upscaling)
+        upscaled = image.resize((new_width, new_height), Image.LANCZOS)
+        
+        # Step 2: Apply unsharp mask for sharpening
+        # Create a slightly blurred version
+        blurred = upscaled.filter(ImageFilter.GaussianBlur(radius=0.8))
+        
+        # Create unsharp mask by subtracting blurred from original
+        from PIL import ImageChops
+        mask = ImageChops.subtract(upscaled, blurred)
+        
+        # Apply the mask back to enhance edges
+        sharpened = ImageChops.add(upscaled, mask)
+        
+        # Step 3: Enhance contrast and color
+        # Enhance contrast (makes edges more defined)
+        contrast_enhancer = ImageEnhance.Contrast(sharpened)
+        enhanced = contrast_enhancer.enhance(1.1)  # 10% contrast boost
+        
+        # Enhance color saturation (makes colors more vibrant)
+        color_enhancer = ImageEnhance.Color(enhanced)
+        vibrant = color_enhancer.enhance(1.2)  # 20% saturation boost
+        
+        # Step 4: Final sharpness enhancement
+        sharpness_enhancer = ImageEnhance.Sharpness(vibrant)
+        final_image = sharpness_enhancer.enhance(1.3)  # 30% sharpness boost
+        
+        print("    ✓ Image upscaled with advanced enhancement!")
+        return final_image
+        
+    except ImportError:
+        # Fallback to basic resize if advanced features not available
+        print("    Using basic upscaling (install PIL for advanced features)...")
+        new_width = int(image.size[0] * factor)
+        new_height = int(image.size[1] * factor)
+        return image.resize((new_width, new_height), Image.LANCZOS)
+    except Exception as e:
+        print(f"    [WARNING] Upscaling failed: {e}")
+        print("    Continuing with original image...")
+        return image
 
 
     #---------------------- Main ----------------------
@@ -231,15 +285,13 @@ if option == "E":
         #---------------------- Encoding ----------------------             # Start of Encoding process
 
         try:
-            F = Image_path.split('/')
-            F = F[-1]
-            F = F.split(".")
-            F = F[0]
-            
+            # Get filename without path and extension
+            basename = os.path.basename(Image_path)
+            filename_without_ext = os.path.splitext(basename)[0]
             
             if not os.path.exists("Encoded"):                               # Create a folder "Encoded"
                 os.makedirs("Encoded")
-            F = "Encoded/Encoded_"+F+".txt"                                 # Creates the file where the encoding is going
+            F = "Encoded/Encoded_"+filename_without_ext+".txt"                                 # Creates the file where the encoding is going
             file = open(F, 'w')                                             # to be stored while encoding.
         except Exception as e:
             print(e)
@@ -279,10 +331,11 @@ elif option == "D":
             Encoded_lst = Choose_Files('Text')                              # User input for path of encoded file path
             
         except _tkinter.TclError:
-            print("[ERROR] Could not open explorer window.")
-            Encoded_lst = input("\nPlease enter the path of the file manually: ")
-            if '"' in Encoded_lst:
-                Encoded_lst = Encoded_lst.replace('"','')
+            print("[ERROR] Could not open explorer window. If decoding multiple files, please use a comma to seperate the paths.")
+            Encoded_path = input("\nPlease enter the path of the file manually: ")
+            if '"' in Encoded_path:
+                Encoded_path = Encoded_path.replace('"','')
+            Encoded_lst = Encoded_path.split(',')
         except Exception as e:
             print(f"\n{e}\n[ERROR] Please try again.")
             continue
@@ -296,14 +349,18 @@ elif option == "D":
     
     start_time = time.perf_counter ()                                       # Starts recording time for execution                      
     
+    # Initialize upscaling variables
+    enable_upscaling = False
+    upscale_factor = 1.0
+    
     for nume,Encoded_img in enumerate(Encoded_lst):
         
-        Decoded_lst = []
+        Decoded_lst = []                                                    # Intitializing variables
         Decoded_lst1 = []
         pixel_data = []
         Encoded_str = ''
         
-        print(f"\nDecoding {nume+1}) {Encoded_img.split('/')[-1]} ...")     # Prints the name of the file being decoded
+        print(f"\nDecoding {nume+1}) {os.path.basename(Encoded_img)} ...")     # Prints the name of the file being decoded
        
        #---------------------- Loading Encoded File ----------------------
         try:
@@ -315,6 +372,29 @@ elif option == "D":
             input()
             sys.exit()
        
+        #---------------------- Upscaling Option ----------------------
+        if nume == 0:  # Only ask once for all files
+            try:
+                upscale_choice = input("\nDo you want to upscale the decoded image(s) for enhanced quality? [Y/N]: ").upper()
+                if upscale_choice in ['Y', 'YES']:
+                    upscale_factor = input("Enter upscale factor (2-4 recommended, default 2): ").strip()
+                    try:
+                        upscale_factor = float(upscale_factor) if upscale_factor else 2.0
+                        upscale_factor = max(1.0, min(upscale_factor, 8.0))  # Limit between 1-8x
+                        enable_upscaling = True
+                        print(f"    Upscaling enabled with factor: {upscale_factor}x")
+                    except ValueError:
+                        upscale_factor = 2.0
+                        enable_upscaling = True
+                        print("    Using default upscale factor: 2.0x")
+                else:
+                    enable_upscaling = False
+                    upscale_factor = 1.0
+            except KeyboardInterrupt:
+                print("\n[ERROR] Keyboard Interrupt. Exiting...")
+                input()
+                sys.exit()
+        
         #---------------------- Decoding ----------------------
 
         c=1
@@ -377,22 +457,35 @@ elif option == "D":
             input()
             sys.exit()
 
+        #---------------------- Image Enhancement & Upscaling ----------------------
+        if enable_upscaling and upscale_factor > 1.0:
+            print("\n    Applying advanced upscaling and enhancement...")
+            try:
+                image = Upscale_Image(image, upscale_factor)
+            except Exception as e:
+                print(f"    [WARNING] Upscaling failed: {e}")
+                print("    Continuing with original image...")
 
         #---------------------- Saving Image ----------------------
         print("\n    Saving Image...")
 
-        if '\\' in Encoded_img:
-            Encoded_img = Encoded_img.split('\\')[-1]
-        if '/' in Encoded_img:
-            Encoded_img = Encoded_img.split('/')[-1]
-        if 'Encoded_' in Encoded_img:
-            Encoded_img = Encoded_img.replace("Encoded_", "")
+        # Get just the filename without the path
+        filename = os.path.basename(Encoded_img)
+        if 'Encoded_' in filename:
+            filename = filename.replace("Encoded_", "")
+        
+        # Add upscale indicator to filename
+        base_name = filename[:-4]
+        if enable_upscaling and upscale_factor > 1.0:
+            save_filename = f'Decoded_Upscaled_{upscale_factor}x_{base_name}.jpg'
+        else:
+            save_filename = f'Decoded_{base_name}.jpg'
         
         try:
             
             if not os.path.exists("Decoded"):                               # If folder "Decoded" does not exist, then create it
                 os.makedirs("Decoded")
-            image.save('Decoded/Decoded_' + Encoded_img[:-4] + '.jpg')      # Saves the generated image with "Decoded_" prefix and the name of the txt file
+            image.save(f'Decoded/{save_filename}')      # Saves the generated image with "Decoded_" prefix and the name of the txt file
         except Exception as e:
             print("\n[ERROR] Image saving failed")
             print(f"[ERROR] {e}")
@@ -400,7 +493,7 @@ elif option == "D":
             sys.exit()
         print("    Image saved successfully")
         try:
-            os.startfile('Decoded_' + Encoded_lst[:-4] + '.jpg')            # Opens the saved image
+            os.startfile(f'Decoded/{save_filename}')            # Opens the saved image
         except:
             pass
 
